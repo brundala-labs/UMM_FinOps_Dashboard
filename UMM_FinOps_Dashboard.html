@@ -1,0 +1,1922 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UMM FinOps Dashboard - University of Michigan Medicine</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --umm-blue: #00274C;
+            --umm-maize: #FFCB05;
+            --umm-blue-light: #2F65A7;
+            --umm-teal: #00B2A9;
+            --umm-red: #9A3324;
+            --umm-tan: #CFC096;
+            --umm-sage: #75988D;
+            --bg-light: #F5F7FA;
+            --border-color: #E1E5EB;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-light);
+            color: var(--umm-blue);
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, var(--umm-blue) 0%, #003366 100%);
+            color: white;
+            padding: 16px 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .logo-placeholder {
+            width: 50px;
+            height: 50px;
+            background: var(--umm-maize);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: var(--umm-blue);
+            font-size: 11px;
+            text-align: center;
+            line-height: 1.2;
+        }
+
+        .header-title h1 {
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .header-title p {
+            font-size: 12px;
+            opacity: 0.85;
+        }
+
+        .header-right {
+            font-size: 13px;
+            text-align: right;
+        }
+
+        /* Navigation Tabs */
+        .nav-tabs {
+            background: white;
+            padding: 0 32px;
+            display: flex;
+            gap: 0;
+            border-bottom: 3px solid var(--umm-maize);
+        }
+
+        .nav-tab {
+            padding: 14px 24px;
+            cursor: pointer;
+            border: none;
+            background: transparent;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--umm-blue);
+            opacity: 0.7;
+            transition: all 0.2s;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -3px;
+        }
+
+        .nav-tab:hover {
+            opacity: 1;
+            background: rgba(0, 39, 76, 0.05);
+        }
+
+        .nav-tab.active {
+            opacity: 1;
+            border-bottom-color: var(--umm-blue);
+            background: rgba(255, 203, 5, 0.1);
+        }
+
+        /* Main Content */
+        .main-content {
+            padding: 24px 32px;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        /* Page Header */
+        .page-header {
+            margin-bottom: 24px;
+        }
+
+        .page-header h2 {
+            font-size: 24px;
+            color: var(--umm-blue);
+            margin-bottom: 4px;
+        }
+
+        .page-header p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        /* Filters Section */
+        .filters {
+            background: white;
+            padding: 16px 20px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            align-items: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .filter-group label {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: #666;
+        }
+
+        .filter-group select {
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 13px;
+            min-width: 200px;
+            color: var(--umm-blue);
+        }
+
+        .filter-group select:focus {
+            outline: none;
+            border-color: var(--umm-blue-light);
+        }
+
+        .filter-reset {
+            padding: 8px 16px;
+            background: var(--umm-blue);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            margin-top: 18px;
+        }
+
+        .filter-reset:hover {
+            background: var(--umm-blue-light);
+        }
+
+        /* KPI Cards */
+        .kpi-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+
+        .kpi-card {
+            background: white;
+            padding: 20px 24px;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+            border-left: 4px solid var(--umm-maize);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+        }
+
+        .kpi-card.alert {
+            border-left-color: var(--umm-red);
+        }
+
+        .kpi-card.success {
+            border-left-color: var(--umm-teal);
+        }
+
+        .kpi-card.info {
+            border-left-color: var(--umm-blue-light);
+        }
+
+        .kpi-label {
+            font-size: 12px;
+            color: #666;
+            text-transform: uppercase;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .kpi-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--umm-blue);
+        }
+
+        .kpi-subtext {
+            font-size: 12px;
+            color: #888;
+            margin-top: 4px;
+        }
+
+        .kpi-trend {
+            display: inline-flex;
+            align-items: center;
+            font-size: 12px;
+            margin-top: 6px;
+            padding: 2px 8px;
+            border-radius: 12px;
+        }
+
+        .kpi-trend.up {
+            background: #FFEBEE;
+            color: var(--umm-red);
+        }
+
+        .kpi-trend.down {
+            background: #E8F5E9;
+            color: #2E7D32;
+        }
+
+        /* Cards/Panels */
+        .card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+            margin-bottom: 24px;
+        }
+
+        .card-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border-color);
+            font-weight: 600;
+            color: var(--umm-blue);
+            font-size: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-header .badge {
+            background: var(--umm-maize);
+            color: var(--umm-blue);
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .card-body {
+            padding: 20px;
+        }
+
+        /* Tables */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        .data-table th {
+            text-align: left;
+            padding: 12px 16px;
+            background: var(--bg-light);
+            font-weight: 600;
+            color: var(--umm-blue);
+            border-bottom: 2px solid var(--umm-maize);
+            font-size: 11px;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        .data-table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .data-table tr:hover {
+            background: rgba(255, 203, 5, 0.05);
+        }
+
+        .data-table .text-right {
+            text-align: right;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .status-active {
+            background: #E8F5E9;
+            color: #2E7D32;
+        }
+
+        .status-expiring {
+            background: #FFF3E0;
+            color: #E65100;
+        }
+
+        .status-expired {
+            background: #FFEBEE;
+            color: #C62828;
+        }
+
+        .status-open {
+            background: #FFEBEE;
+            color: #C62828;
+        }
+
+        .status-closed {
+            background: #E8F5E9;
+            color: #2E7D32;
+        }
+
+        .status-pending {
+            background: #FFF3E0;
+            color: #E65100;
+        }
+
+        .env-type-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .env-ave {
+            background: var(--umm-blue);
+            color: white;
+        }
+
+        .env-standard {
+            background: var(--umm-blue-light);
+            color: white;
+        }
+
+        .env-hipaa {
+            background: var(--umm-red);
+            color: white;
+        }
+
+        /* Progress Bar */
+        .progress-bar {
+            height: 8px;
+            background: #E1E5EB;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 4px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.3s;
+        }
+
+        .progress-fill.good {
+            background: var(--umm-teal);
+        }
+
+        .progress-fill.warning {
+            background: #FF9800;
+        }
+
+        .progress-fill.danger {
+            background: var(--umm-red);
+        }
+
+        /* Grid Layout */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 24px;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+        }
+
+        @media (max-width: 1200px) {
+            .grid-2, .grid-3 {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Chart Container */
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
+
+        .chart-container.tall {
+            height: 350px;
+        }
+
+        /* Matrix Table */
+        .matrix-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        .matrix-table th, .matrix-table td {
+            padding: 10px 14px;
+            text-align: right;
+            border: 1px solid var(--border-color);
+        }
+
+        .matrix-table th {
+            background: var(--umm-blue);
+            color: white;
+            font-weight: 600;
+        }
+
+        .matrix-table th:first-child,
+        .matrix-table td:first-child {
+            text-align: left;
+        }
+
+        .matrix-table .row-header {
+            background: var(--bg-light);
+            font-weight: 600;
+        }
+
+        .matrix-table .subtotal {
+            background: rgba(255, 203, 5, 0.15);
+            font-weight: 600;
+        }
+
+        .variance-positive {
+            color: var(--umm-teal);
+        }
+
+        .variance-negative {
+            color: var(--umm-red);
+        }
+
+        /* Summary Stats */
+        .summary-stats {
+            display: flex;
+            gap: 32px;
+            padding: 16px 0;
+            border-top: 1px solid var(--border-color);
+            margin-top: 16px;
+        }
+
+        .summary-stat {
+            text-align: center;
+        }
+
+        .summary-stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--umm-blue);
+        }
+
+        .summary-stat-label {
+            font-size: 11px;
+            color: #666;
+            text-transform: uppercase;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #888;
+            font-size: 12px;
+            border-top: 1px solid var(--border-color);
+            margin-top: 40px;
+        }
+
+        /* Scrollable table */
+        .table-scroll {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        /* Print Styles */
+        @media print {
+            .nav-tabs, .filters {
+                display: none;
+            }
+            .page {
+                display: block !important;
+                page-break-after: always;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-left">
+            <div class="logo-placeholder">Michigan<br>Medicine</div>
+            <div class="header-title">
+                <h1>FinOps Cloud Cost Management</h1>
+                <p>University of Michigan Medicine - Research Computing</p>
+            </div>
+        </div>
+        <div class="header-right">
+            <div>Report Generated: <span id="currentDate"></span></div>
+            <div>Data Source: Azure Cost Management + ServiceNow</div>
+        </div>
+    </header>
+
+    <!-- Navigation -->
+    <nav class="nav-tabs">
+        <button class="nav-tab active" onclick="showPage('page1')">PI Research Cost Overview</button>
+        <button class="nav-tab" onclick="showPage('page2')">Finance & Research Administration</button>
+        <button class="nav-tab" onclick="showPage('page3')">Cloud Operations & FinOps</button>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+        <!-- PAGE 1: PI Research Cost Overview -->
+        <div id="page1" class="page active">
+            <div class="page-header">
+                <h2>PI Research Cost Overview</h2>
+                <p>Monthly cloud spending summary for Principal Investigators and research teams</p>
+            </div>
+
+            <!-- Filters -->
+            <div class="filters">
+                <div class="filter-group">
+                    <label>Grant</label>
+                    <select id="filter-grant" onchange="applyFilters()">
+                        <option value="all">All Grants</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Department</label>
+                    <select id="filter-dept" onchange="applyFilters()">
+                        <option value="all">All Departments</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Billing Month</label>
+                    <select id="filter-month" onchange="applyFilters()">
+                        <option value="all">All Months (YTD)</option>
+                    </select>
+                </div>
+                <button class="filter-reset" onclick="resetFilters()">Reset Filters</button>
+            </div>
+
+            <!-- KPI Cards -->
+            <div class="kpi-row">
+                <div class="kpi-card">
+                    <div class="kpi-label">Total Cost (Selected Period)</div>
+                    <div class="kpi-value" id="kpi-total-cost">$0</div>
+                    <div class="kpi-subtext" id="kpi-total-cost-sub">Loading...</div>
+                </div>
+                <div class="kpi-card success">
+                    <div class="kpi-label">Budget Remaining</div>
+                    <div class="kpi-value" id="kpi-budget-remaining">$0</div>
+                    <div class="kpi-subtext" id="kpi-budget-pct">0% of budget used</div>
+                </div>
+                <div class="kpi-card alert" id="kpi-expiring-card">
+                    <div class="kpi-label">Environments Expiring Soon</div>
+                    <div class="kpi-value" id="kpi-expiring">0</div>
+                    <div class="kpi-subtext">Within 30 days</div>
+                </div>
+                <div class="kpi-card info">
+                    <div class="kpi-label">Active Environments</div>
+                    <div class="kpi-value" id="kpi-active-env">0</div>
+                    <div class="kpi-subtext">Research computing resources</div>
+                </div>
+            </div>
+
+            <!-- Research Projects Table -->
+            <div class="card">
+                <div class="card-header">
+                    Research Project Environments
+                    <span class="badge" id="project-count">0 Projects</span>
+                </div>
+                <div class="card-body">
+                    <div class="table-scroll">
+                        <table class="data-table" id="projects-table">
+                            <thead>
+                                <tr>
+                                    <th>Research Project</th>
+                                    <th>Department</th>
+                                    <th>Environment Type</th>
+                                    <th class="text-right">Monthly Cost</th>
+                                    <th class="text-right">Grant Budget</th>
+                                    <th>Grant</th>
+                                    <th>End Date</th>
+                                    <th>Budget Usage</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="projects-tbody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cost by Department Chart -->
+            <div class="card">
+                <div class="card-header">Cost Distribution by Department</div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="deptCostChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PAGE 2: Finance & Research Administration -->
+        <div id="page2" class="page">
+            <div class="page-header">
+                <h2>Finance & Research Administration</h2>
+                <p>Department and grant-level cost analysis with budget variance tracking</p>
+            </div>
+
+            <!-- Filters -->
+            <div class="filters">
+                <div class="filter-group">
+                    <label>Department</label>
+                    <select id="filter-dept-p2" onchange="applyFilters()">
+                        <option value="all">All Departments</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Fiscal Year</label>
+                    <select id="filter-fy" onchange="applyFilters()">
+                        <option value="FY2026">FY 2026</option>
+                        <option value="FY2025">FY 2025</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Summary KPIs -->
+            <div class="kpi-row">
+                <div class="kpi-card">
+                    <div class="kpi-label">Total YTD Spend</div>
+                    <div class="kpi-value" id="kpi-ytd-spend">$0</div>
+                    <div class="kpi-trend up" id="kpi-ytd-trend">+12% vs prior period</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">Total Annual Budget</div>
+                    <div class="kpi-value" id="kpi-annual-budget">$0</div>
+                    <div class="kpi-subtext">Across all grants</div>
+                </div>
+                <div class="kpi-card success">
+                    <div class="kpi-label">Budget Variance</div>
+                    <div class="kpi-value" id="kpi-variance">$0</div>
+                    <div class="kpi-subtext" id="kpi-variance-sub">Under budget</div>
+                </div>
+                <div class="kpi-card info">
+                    <div class="kpi-label">AVE (PHI) % of Spend</div>
+                    <div class="kpi-value" id="kpi-ave-pct">0%</div>
+                    <div class="kpi-subtext">Secure research environments</div>
+                </div>
+            </div>
+
+            <!-- Matrix: Department > Grant -->
+            <div class="card">
+                <div class="card-header">Cost by Department and Grant</div>
+                <div class="card-body">
+                    <div class="table-scroll">
+                        <table class="matrix-table" id="matrix-table">
+                            <thead>
+                                <tr>
+                                    <th>Department / Grant</th>
+                                    <th>Total Cost</th>
+                                    <th>Budget</th>
+                                    <th>Variance</th>
+                                    <th>% Used</th>
+                                </tr>
+                            </thead>
+                            <tbody id="matrix-tbody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid-2">
+                <!-- Monthly Spend Trend -->
+                <div class="card">
+                    <div class="card-header">Monthly Spend Trend (12 Months)</div>
+                    <div class="card-body">
+                        <div class="chart-container tall">
+                            <canvas id="spendTrendChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AVE vs Non-PHI Spend -->
+                <div class="card">
+                    <div class="card-header">AVE (PHI) vs Standard Environment Spend</div>
+                    <div class="card-body">
+                        <div class="chart-container tall">
+                            <canvas id="aveVsStandardChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Department Spend Comparison -->
+            <div class="card">
+                <div class="card-header">Department Spend Comparison</div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="deptCompareChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PAGE 3: Cloud Operations & FinOps -->
+        <div id="page3" class="page">
+            <div class="page-header">
+                <h2>Cloud Operations & FinOps</h2>
+                <p>Operational view for IT and Cloud Platform teams - cost optimization and compliance</p>
+            </div>
+
+            <!-- Filters -->
+            <div class="filters">
+                <div class="filter-group">
+                    <label>Department</label>
+                    <select id="filter-dept-p3" onchange="applyFilters()">
+                        <option value="all">All Departments</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Environment Type</label>
+                    <select id="filter-env-type-p3" onchange="applyFilters()">
+                        <option value="all">All Types</option>
+                        <option value="AVE">AVE (PHI)</option>
+                        <option value="Standard">Standard (Non-PHI)</option>
+                    </select>
+                </div>
+                <button class="filter-reset" onclick="resetFiltersP3()">Reset Filters</button>
+            </div>
+
+            <!-- KPI Cards -->
+            <div class="kpi-row">
+                <div class="kpi-card alert">
+                    <div class="kpi-label">Open Compliance Issues</div>
+                    <div class="kpi-value" id="kpi-compliance">0</div>
+                    <div class="kpi-subtext">Requires remediation</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">Total Environments</div>
+                    <div class="kpi-value" id="kpi-total-env">0</div>
+                    <div class="kpi-subtext">Active cloud environments</div>
+                </div>
+                <div class="kpi-card success">
+                    <div class="kpi-label">Compliance Rate</div>
+                    <div class="kpi-value" id="kpi-compliance-rate">0%</div>
+                    <div class="kpi-subtext">Resources in compliance</div>
+                </div>
+                <div class="kpi-card info">
+                    <div class="kpi-label">Est. Monthly Savings</div>
+                    <div class="kpi-value" id="kpi-savings">$0</div>
+                    <div class="kpi-subtext">From remediation</div>
+                </div>
+            </div>
+
+            <div class="grid-2">
+                <!-- Top Cost Environments -->
+                <div class="card">
+                    <div class="card-header">
+                        Top Cost Environments
+                        <span class="badge">Top 10</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-scroll">
+                            <table class="data-table" id="top-cost-table">
+                                <thead>
+                                    <tr>
+                                        <th>Environment</th>
+                                        <th>Department</th>
+                                        <th>Type</th>
+                                        <th class="text-right">Monthly Cost</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="top-cost-tbody">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Compliance Issues -->
+                <div class="card">
+                    <div class="card-header">
+                        Non-Compliant Resources
+                        <span class="badge" id="compliance-badge">0 Issues</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-scroll">
+                            <table class="data-table" id="compliance-table">
+                                <thead>
+                                    <tr>
+                                        <th>Environment</th>
+                                        <th>Policy Violation</th>
+                                        <th class="text-right">Impact/Mo</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="compliance-tbody">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid-2">
+                <!-- Service Category Breakdown -->
+                <div class="card">
+                    <div class="card-header">Cost by Service Category</div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="serviceCategoryChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Compliance by Policy -->
+                <div class="card">
+                    <div class="card-header">Compliance Issues by Policy</div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="compliancePolicyChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Environment Lifecycle -->
+            <div class="card">
+                <div class="card-header">Environment Lifecycle Status</div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="lifecycleChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>University of Michigan Medicine - FinOps Cloud Cost Management Dashboard</p>
+        <p>Data aligned to ServiceNow Service Catalog + Azure Cost Management | Confidential - Internal Use Only</p>
+    </footer>
+
+    <script>
+        // ============================================
+        // EXPANDED SAMPLE DATA
+        // ============================================
+
+        const DEPARTMENTS = {
+            "DEPT-CARD": "Cardiology",
+            "DEPT-ONC": "Oncology",
+            "DEPT-NEUR": "Neurology",
+            "DEPT-PEDS": "Pediatrics",
+            "DEPT-SURG": "Surgery",
+            "DEPT-PATH": "Pathology",
+            "DEPT-RADI": "Radiology",
+            "DEPT-PSYC": "Psychiatry"
+        };
+
+        const GRANTS = {
+            "GRANT-NIH-HL-2024-01": { name: "NIH Heart & Lung Research 2024", dept: "DEPT-CARD", budget: 85000 },
+            "GRANT-NIH-CA-2025-09": { name: "NIH Cancer Genomics 2025", dept: "DEPT-ONC", budget: 220000 },
+            "GRANT-NIH-NS-2024-15": { name: "NIH Neurological Studies", dept: "DEPT-NEUR", budget: 130000 },
+            "GRANT-PCORI-2025-03": { name: "PCORI Pediatric Outcomes", dept: "DEPT-PEDS", budget: 52000 },
+            "GRANT-DOD-2024-22": { name: "DoD Surgical Innovation", dept: "DEPT-SURG", budget: 115000 },
+            "GRANT-NIH-AI-2025-07": { name: "NIH AI in Pathology", dept: "DEPT-PATH", budget: 85000 },
+            "GRANT-AHRQ-2024-11": { name: "AHRQ Imaging Analytics", dept: "DEPT-RADI", budget: 48000 },
+            "GRANT-NIMH-2025-04": { name: "NIMH Mental Health Data", dept: "DEPT-PSYC", budget: 45000 }
+        };
+
+        // Define requests and environments first - with realistic research project names
+        const REQUESTS = [
+            { RequestId: "RITM001001", CatalogItemName: "Cardiac Arrhythmia Genomics Analysis", EnvironmentType: "Standard", DataClassification: "Non-PHI", DepartmentId: "DEPT-CARD", GrantId: "GRANT-NIH-HL-2024-01", ExpectedEndDate: "2026-10-15", RequestStatus: "Active" },
+            { RequestId: "RITM001002", CatalogItemName: "Breast Cancer Biomarker Discovery (PHI)", EnvironmentType: "AVE", DataClassification: "PHI", DepartmentId: "DEPT-ONC", GrantId: "GRANT-NIH-CA-2025-09", ExpectedEndDate: "2026-12-31", RequestStatus: "Active" },
+            { RequestId: "RITM001003", CatalogItemName: "Alzheimer's Disease MRI Processing", EnvironmentType: "Standard", DataClassification: "Non-PHI", DepartmentId: "DEPT-NEUR", GrantId: "GRANT-NIH-NS-2024-15", ExpectedEndDate: "2026-08-30", RequestStatus: "Active" },
+            { RequestId: "RITM001004", CatalogItemName: "Pediatric Asthma Outcomes Study (PHI)", EnvironmentType: "AVE", DataClassification: "PHI", DepartmentId: "DEPT-PEDS", GrantId: "GRANT-PCORI-2025-03", ExpectedEndDate: "2026-02-15", RequestStatus: "Active" },
+            { RequestId: "RITM001005", CatalogItemName: "Robotic Surgery ML Training", EnvironmentType: "Standard", DataClassification: "Non-PHI", DepartmentId: "DEPT-SURG", GrantId: "GRANT-DOD-2024-22", ExpectedEndDate: "2026-11-30", RequestStatus: "Active" },
+            { RequestId: "RITM001006", CatalogItemName: "Digital Pathology AI Diagnostics (PHI)", EnvironmentType: "AVE", DataClassification: "PHI", DepartmentId: "DEPT-PATH", GrantId: "GRANT-NIH-AI-2025-07", ExpectedEndDate: "2026-09-15", RequestStatus: "Active" },
+            { RequestId: "RITM001007", CatalogItemName: "CT Imaging Reconstruction Pipeline", EnvironmentType: "Standard", DataClassification: "Non-PHI", DepartmentId: "DEPT-RADI", GrantId: "GRANT-AHRQ-2024-11", ExpectedEndDate: "2026-06-30", RequestStatus: "Active" },
+            { RequestId: "RITM001008", CatalogItemName: "Depression Treatment Response (PHI)", EnvironmentType: "AVE", DataClassification: "PHI", DepartmentId: "DEPT-PSYC", GrantId: "GRANT-NIMH-2025-04", ExpectedEndDate: "2026-04-30", RequestStatus: "Active" },
+            { RequestId: "RITM001009", CatalogItemName: "Tumor Genomics Sequencing Cluster", EnvironmentType: "Standard", DataClassification: "Non-PHI", DepartmentId: "DEPT-ONC", GrantId: "GRANT-NIH-CA-2025-09", ExpectedEndDate: "2026-12-31", RequestStatus: "Active" },
+            { RequestId: "RITM001010", CatalogItemName: "Heart Failure Predictive Analytics", EnvironmentType: "Standard", DataClassification: "Non-PHI", DepartmentId: "DEPT-CARD", GrantId: "GRANT-NIH-HL-2024-01", ExpectedEndDate: "2026-10-15", RequestStatus: "Active" },
+            { RequestId: "RITM001011", CatalogItemName: "Parkinson's Disease Registry (PHI)", EnvironmentType: "AVE", DataClassification: "PHI", DepartmentId: "DEPT-NEUR", GrantId: "GRANT-NIH-NS-2024-15", ExpectedEndDate: "2026-08-30", RequestStatus: "Active" },
+            { RequestId: "RITM001012", CatalogItemName: "Surgical Outcomes DevTest Sandbox", EnvironmentType: "Standard", DataClassification: "Non-PHI", DepartmentId: "DEPT-SURG", GrantId: "GRANT-DOD-2024-22", ExpectedEndDate: "2026-03-15", RequestStatus: "Active" }
+        ];
+
+        const ENVIRONMENTS = [
+            { EnvironmentId: "ENV-001001", RequestId: "RITM001001", EnvironmentStatus: "Active" },
+            { EnvironmentId: "AVE-001002", RequestId: "RITM001002", EnvironmentStatus: "Active" },
+            { EnvironmentId: "ENV-001003", RequestId: "RITM001003", EnvironmentStatus: "Active" },
+            { EnvironmentId: "AVE-001004", RequestId: "RITM001004", EnvironmentStatus: "Active" },
+            { EnvironmentId: "ENV-001005", RequestId: "RITM001005", EnvironmentStatus: "Active" },
+            { EnvironmentId: "AVE-001006", RequestId: "RITM001006", EnvironmentStatus: "Active" },
+            { EnvironmentId: "ENV-001007", RequestId: "RITM001007", EnvironmentStatus: "Active" },
+            { EnvironmentId: "AVE-001008", RequestId: "RITM001008", EnvironmentStatus: "Active" },
+            { EnvironmentId: "ENV-001009", RequestId: "RITM001009", EnvironmentStatus: "Active" },
+            { EnvironmentId: "ENV-001010", RequestId: "RITM001010", EnvironmentStatus: "Active" },
+            { EnvironmentId: "AVE-001011", RequestId: "RITM001011", EnvironmentStatus: "Active" },
+            { EnvironmentId: "ENV-001012", RequestId: "RITM001012", EnvironmentStatus: "Active" }
+        ];
+
+        // Generate cost data function
+        function generateMonthlyCosts() {
+            const costs = [];
+            const months = ['2025-02', '2025-03', '2025-04', '2025-05', '2025-06', '2025-07',
+                           '2025-08', '2025-09', '2025-10', '2025-11', '2025-12', '2026-01'];
+
+            // Base monthly costs per environment - calibrated for realistic budget usage (50-90%)
+            const envBaseCosts = {
+                "ENV-001001": 2200,  // Cardiology - standard
+                "AVE-001002": 9500,  // Oncology - AVE (PHI) - higher cost
+                "ENV-001003": 4800,  // Neurology - HPC
+                "AVE-001004": 3200,  // Pediatrics - AVE
+                "ENV-001005": 4200,  // Surgery - ML Training
+                "AVE-001006": 5200,  // Pathology - AVE
+                "ENV-001007": 2800,  // Radiology - imaging
+                "AVE-001008": 2600,  // Psychiatry - AVE
+                "ENV-001009": 6800,  // Oncology - GPU cluster
+                "ENV-001010": 1800,  // Cardiology - analytics
+                "AVE-001011": 4500,  // Neurology - AVE registry
+                "ENV-001012": 1200   // Surgery - DevTest (lower cost)
+            };
+
+            const envToRequest = {};
+            ENVIRONMENTS.forEach(e => envToRequest[e.EnvironmentId] = e.RequestId);
+
+            const requestToGrant = {};
+            const requestToDept = {};
+            REQUESTS.forEach(r => {
+                requestToGrant[r.RequestId] = r.GrantId;
+                requestToDept[r.RequestId] = r.DepartmentId;
+            });
+
+            months.forEach((month, monthIdx) => {
+                Object.keys(envBaseCosts).forEach(envId => {
+                    const requestId = envToRequest[envId];
+                    const grantId = requestToGrant[requestId];
+                    const deptId = requestToDept[requestId];
+
+                    // Add some variation and growth trend
+                    const growthFactor = 1 + (monthIdx * 0.015);
+                    const randomFactor = 0.9 + Math.random() * 0.2;
+                    const baseCost = envBaseCosts[envId] * growthFactor * randomFactor;
+
+                    // Split into service categories
+                    costs.push({ BillingMonth: month, EnvironmentId: envId, DepartmentId: deptId, GrantId: grantId, CostUSD: baseCost * 0.58, ServiceCategory: 'Compute' });
+                    costs.push({ BillingMonth: month, EnvironmentId: envId, DepartmentId: deptId, GrantId: grantId, CostUSD: baseCost * 0.18, ServiceCategory: 'Storage' });
+                    costs.push({ BillingMonth: month, EnvironmentId: envId, DepartmentId: deptId, GrantId: grantId, CostUSD: baseCost * 0.09, ServiceCategory: 'Networking' });
+                    costs.push({ BillingMonth: month, EnvironmentId: envId, DepartmentId: deptId, GrantId: grantId, CostUSD: baseCost * (envId.startsWith('AVE') ? 0.10 : 0.05), ServiceCategory: 'Security/Logging' });
+                    costs.push({ BillingMonth: month, EnvironmentId: envId, DepartmentId: deptId, GrantId: grantId, CostUSD: baseCost * 0.05, ServiceCategory: 'Database' });
+                });
+            });
+
+            return costs;
+        }
+
+        // Generate budget data function
+        function generateMonthlyBudgets() {
+            const budgets = [];
+            const months = ['2025-02', '2025-03', '2025-04', '2025-05', '2025-06', '2025-07',
+                           '2025-08', '2025-09', '2025-10', '2025-11', '2025-12', '2026-01'];
+
+            Object.keys(GRANTS).forEach(grantId => {
+                const grant = GRANTS[grantId];
+                const monthlyBudget = grant.budget / 12;
+                months.forEach(month => {
+                    budgets.push({
+                        BillingMonth: month,
+                        GrantId: grantId,
+                        DepartmentId: grant.dept,
+                        BudgetUSD: monthlyBudget
+                    });
+                });
+            });
+
+            return budgets;
+        }
+
+        const DATA = {
+            requests: REQUESTS,
+            environments: ENVIRONMENTS,
+            costMonthly: generateMonthlyCosts(),
+            budgetMonthly: generateMonthlyBudgets(),
+            compliance: [
+                { EnvironmentId: "ENV-001001", PolicyName: "RequiredTags", ViolationType: "Missing GrantId Tag", NonCompliantFlag: true, EstimatedMonthlyImpactUSD: 120.00, RemediationStatus: "Open" },
+                { EnvironmentId: "AVE-001002", PolicyName: "ApprovedRegions", ViolationType: "Non-approved region", NonCompliantFlag: false, EstimatedMonthlyImpactUSD: 0.00, RemediationStatus: "Closed" },
+                { EnvironmentId: "ENV-001003", PolicyName: "RequiredTags", ViolationType: "Missing CostCenter Tag", NonCompliantFlag: true, EstimatedMonthlyImpactUSD: 85.00, RemediationStatus: "Open" },
+                { EnvironmentId: "ENV-001005", PolicyName: "IdleResources", ViolationType: "VM idle > 7 days", NonCompliantFlag: true, EstimatedMonthlyImpactUSD: 450.00, RemediationStatus: "Pending" },
+                { EnvironmentId: "AVE-001006", PolicyName: "Encryption", ViolationType: "Unencrypted storage", NonCompliantFlag: true, EstimatedMonthlyImpactUSD: 0.00, RemediationStatus: "Open" },
+                { EnvironmentId: "ENV-001007", PolicyName: "ApprovedSKUs", ViolationType: "Non-approved VM size", NonCompliantFlag: false, EstimatedMonthlyImpactUSD: 200.00, RemediationStatus: "Closed" },
+                { EnvironmentId: "ENV-001009", PolicyName: "IdleResources", ViolationType: "Unused disk attached", NonCompliantFlag: true, EstimatedMonthlyImpactUSD: 180.00, RemediationStatus: "Open" },
+                { EnvironmentId: "AVE-001008", PolicyName: "RequiredTags", ViolationType: "Missing PI Tag", NonCompliantFlag: true, EstimatedMonthlyImpactUSD: 65.00, RemediationStatus: "Pending" },
+                { EnvironmentId: "ENV-001010", PolicyName: "NetworkSecurity", ViolationType: "Public IP exposed", NonCompliantFlag: true, EstimatedMonthlyImpactUSD: 0.00, RemediationStatus: "Open" },
+                { EnvironmentId: "AVE-001011", PolicyName: "DataRetention", ViolationType: "Backup policy missing", NonCompliantFlag: true, EstimatedMonthlyImpactUSD: 0.00, RemediationStatus: "Open" },
+                { EnvironmentId: "ENV-001012", PolicyName: "IdleResources", ViolationType: "DevTest unused 14+ days", NonCompliantFlag: true, EstimatedMonthlyImpactUSD: 320.00, RemediationStatus: "Pending" }
+            ]
+        };
+
+        // ============================================
+        // GLOBAL STATE
+        // ============================================
+        let currentFilters = {
+            // Page 1 filters
+            grant: 'all',
+            dept: 'all',
+            month: 'all',
+            // Page 2 filters
+            deptP2: 'all',
+            // Page 3 filters
+            deptP3: 'all',
+            envTypeP3: 'all'
+        };
+
+        // ============================================
+        // PAGE NAVIGATION
+        // ============================================
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+            document.querySelectorAll('.nav-tab').forEach(tab => tab.classList.remove('active'));
+
+            document.getElementById(pageId).classList.add('active');
+            const tabIndex = pageId.replace('page', '') - 1;
+            document.querySelectorAll('.nav-tab')[tabIndex].classList.add('active');
+
+            // Render charts when switching pages
+            setTimeout(() => {
+                if (pageId === 'page1') renderDeptCostChart();
+                if (pageId === 'page2') {
+                    renderSpendTrendChart();
+                    renderAveVsStandardChart();
+                    renderDeptCompareChart();
+                }
+                if (pageId === 'page3') {
+                    renderServiceCategoryChart();
+                    renderCompliancePolicyChart();
+                    renderLifecycleChart();
+                }
+            }, 100);
+        }
+
+        // ============================================
+        // POPULATE FILTERS
+        // ============================================
+        function populateFilters() {
+            // Grants
+            const grantSelect = document.getElementById('filter-grant');
+            Object.keys(GRANTS).forEach(grantId => {
+                const opt = document.createElement('option');
+                opt.value = grantId;
+                opt.textContent = GRANTS[grantId].name;
+                grantSelect.appendChild(opt);
+            });
+
+            // Departments (populate all 3 pages)
+            ['filter-dept', 'filter-dept-p2', 'filter-dept-p3'].forEach(selectId => {
+                const select = document.getElementById(selectId);
+                if (select) {
+                    Object.keys(DEPARTMENTS).forEach(deptId => {
+                        const opt = document.createElement('option');
+                        opt.value = deptId;
+                        opt.textContent = DEPARTMENTS[deptId];
+                        select.appendChild(opt);
+                    });
+                }
+            });
+
+            // Months
+            const monthSelect = document.getElementById('filter-month');
+            const months = [...new Set(DATA.costMonthly.map(c => c.BillingMonth))].sort().reverse();
+            months.forEach(month => {
+                const opt = document.createElement('option');
+                opt.value = month;
+                opt.textContent = formatMonth(month);
+                monthSelect.appendChild(opt);
+            });
+        }
+
+        // ============================================
+        // FILTERS & DATA CALCULATION
+        // ============================================
+        function applyFilters() {
+            // Page 1 filters
+            currentFilters.grant = document.getElementById('filter-grant')?.value || 'all';
+            currentFilters.dept = document.getElementById('filter-dept')?.value || 'all';
+            currentFilters.month = document.getElementById('filter-month')?.value || 'all';
+            // Page 2 filters
+            currentFilters.deptP2 = document.getElementById('filter-dept-p2')?.value || 'all';
+            // Page 3 filters
+            currentFilters.deptP3 = document.getElementById('filter-dept-p3')?.value || 'all';
+            currentFilters.envTypeP3 = document.getElementById('filter-env-type-p3')?.value || 'all';
+
+            updatePage1();
+            updatePage2();
+            updatePage3();
+        }
+
+        function resetFilters() {
+            document.getElementById('filter-grant').value = 'all';
+            document.getElementById('filter-dept').value = 'all';
+            document.getElementById('filter-month').value = 'all';
+            applyFilters();
+        }
+
+        function resetFiltersP2() {
+            document.getElementById('filter-dept-p2').value = 'all';
+            applyFilters();
+        }
+
+        function resetFiltersP3() {
+            document.getElementById('filter-dept-p3').value = 'all';
+            document.getElementById('filter-env-type-p3').value = 'all';
+            applyFilters();
+        }
+
+        // Page 1 filtered data
+        function getFilteredCosts() {
+            return DATA.costMonthly.filter(c => {
+                if (currentFilters.grant !== 'all' && c.GrantId !== currentFilters.grant) return false;
+                if (currentFilters.dept !== 'all' && c.DepartmentId !== currentFilters.dept) return false;
+                if (currentFilters.month !== 'all' && c.BillingMonth !== currentFilters.month) return false;
+                return true;
+            });
+        }
+
+        function getFilteredBudgets() {
+            return DATA.budgetMonthly.filter(b => {
+                if (currentFilters.grant !== 'all' && b.GrantId !== currentFilters.grant) return false;
+                if (currentFilters.dept !== 'all' && b.DepartmentId !== currentFilters.dept) return false;
+                if (currentFilters.month !== 'all' && b.BillingMonth !== currentFilters.month) return false;
+                return true;
+            });
+        }
+
+        // Page 2 filtered data
+        function getFilteredCostsP2() {
+            return DATA.costMonthly.filter(c => {
+                if (currentFilters.deptP2 !== 'all' && c.DepartmentId !== currentFilters.deptP2) return false;
+                return true;
+            });
+        }
+
+        function getFilteredBudgetsP2() {
+            return DATA.budgetMonthly.filter(b => {
+                if (currentFilters.deptP2 !== 'all' && b.DepartmentId !== currentFilters.deptP2) return false;
+                return true;
+            });
+        }
+
+        // Page 3 filtered data
+        function getFilteredCostsP3() {
+            return DATA.costMonthly.filter(c => {
+                if (currentFilters.deptP3 !== 'all' && c.DepartmentId !== currentFilters.deptP3) return false;
+                if (currentFilters.envTypeP3 !== 'all') {
+                    const isAVE = c.EnvironmentId.startsWith('AVE');
+                    if (currentFilters.envTypeP3 === 'AVE' && !isAVE) return false;
+                    if (currentFilters.envTypeP3 === 'Standard' && isAVE) return false;
+                }
+                return true;
+            });
+        }
+
+        function getFilteredEnvironmentsP3() {
+            return DATA.environments.filter(e => {
+                const request = DATA.requests.find(r => r.RequestId === e.RequestId);
+                if (currentFilters.deptP3 !== 'all' && request?.DepartmentId !== currentFilters.deptP3) return false;
+                if (currentFilters.envTypeP3 !== 'all') {
+                    const isAVE = e.EnvironmentId.startsWith('AVE');
+                    if (currentFilters.envTypeP3 === 'AVE' && !isAVE) return false;
+                    if (currentFilters.envTypeP3 === 'Standard' && isAVE) return false;
+                }
+                return true;
+            });
+        }
+
+        function getFilteredComplianceP3() {
+            return DATA.compliance.filter(c => {
+                const env = DATA.environments.find(e => e.EnvironmentId === c.EnvironmentId);
+                const request = env ? DATA.requests.find(r => r.RequestId === env.RequestId) : null;
+                if (currentFilters.deptP3 !== 'all' && request?.DepartmentId !== currentFilters.deptP3) return false;
+                if (currentFilters.envTypeP3 !== 'all') {
+                    const isAVE = c.EnvironmentId.startsWith('AVE');
+                    if (currentFilters.envTypeP3 === 'AVE' && !isAVE) return false;
+                    if (currentFilters.envTypeP3 === 'Standard' && isAVE) return false;
+                }
+                return true;
+            });
+        }
+
+        // ============================================
+        // UPDATE PAGE 1
+        // ============================================
+        function updatePage1() {
+            const costs = getFilteredCosts();
+            const budgets = getFilteredBudgets();
+
+            const totalCost = costs.reduce((sum, c) => sum + c.CostUSD, 0);
+            const totalBudget = budgets.reduce((sum, b) => sum + b.BudgetUSD, 0);
+            const budgetRemaining = totalBudget - totalCost;
+            const budgetPct = totalBudget > 0 ? (totalCost / totalBudget * 100) : 0;
+
+            // KPIs
+            document.getElementById('kpi-total-cost').textContent = formatCurrency(totalCost);
+            document.getElementById('kpi-total-cost-sub').textContent = currentFilters.month === 'all' ? 'Year to Date' : formatMonth(currentFilters.month);
+            document.getElementById('kpi-budget-remaining').textContent = formatCurrency(budgetRemaining);
+            document.getElementById('kpi-budget-pct').textContent = `${budgetPct.toFixed(1)}% of budget used`;
+
+            // Expiring environments
+            const today = new Date();
+            const thirtyDays = new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000);
+            const expiring = DATA.requests.filter(r => {
+                if (currentFilters.dept !== 'all' && r.DepartmentId !== currentFilters.dept) return false;
+                if (currentFilters.grant !== 'all' && r.GrantId !== currentFilters.grant) return false;
+                const endDate = new Date(r.ExpectedEndDate);
+                return endDate <= thirtyDays && endDate >= today;
+            });
+            document.getElementById('kpi-expiring').textContent = expiring.length;
+
+            // Active environments
+            const activeEnvs = DATA.requests.filter(r => {
+                if (currentFilters.dept !== 'all' && r.DepartmentId !== currentFilters.dept) return false;
+                if (currentFilters.grant !== 'all' && r.GrantId !== currentFilters.grant) return false;
+                return r.RequestStatus === 'Active';
+            });
+            document.getElementById('kpi-active-env').textContent = activeEnvs.length;
+
+            // Projects table
+            updateProjectsTable(costs, budgets);
+
+            // Chart
+            renderDeptCostChart();
+        }
+
+        function updateProjectsTable(costs, budgets) {
+            const tbody = document.getElementById('projects-tbody');
+            tbody.innerHTML = '';
+
+            // Aggregate costs by request
+            const requestCosts = {};
+            costs.forEach(c => {
+                const env = DATA.environments.find(e => e.EnvironmentId === c.EnvironmentId);
+                if (env) {
+                    requestCosts[env.RequestId] = (requestCosts[env.RequestId] || 0) + c.CostUSD;
+                }
+            });
+
+            // Get grant budgets
+            const grantBudgets = {};
+            budgets.forEach(b => {
+                grantBudgets[b.GrantId] = (grantBudgets[b.GrantId] || 0) + b.BudgetUSD;
+            });
+
+            // Calculate total cost per grant (for accurate budget usage)
+            const grantTotalCosts = {};
+            costs.forEach(c => {
+                grantTotalCosts[c.GrantId] = (grantTotalCosts[c.GrantId] || 0) + c.CostUSD;
+            });
+
+            // Filter requests
+            const filteredRequests = DATA.requests.filter(r => {
+                if (currentFilters.dept !== 'all' && r.DepartmentId !== currentFilters.dept) return false;
+                if (currentFilters.grant !== 'all' && r.GrantId !== currentFilters.grant) return false;
+                return true;
+            });
+
+            document.getElementById('project-count').textContent = `${filteredRequests.length} Projects`;
+
+            filteredRequests.forEach(r => {
+                const cost = requestCosts[r.RequestId] || 0;
+                const budget = grantBudgets[r.GrantId] || 0;
+                const grantTotalCost = grantTotalCosts[r.GrantId] || 0;
+                // Budget usage = total grant cost vs grant budget (not individual project cost)
+                const budgetPct = budget > 0 ? (grantTotalCost / budget * 100) : 0;
+                const endDate = new Date(r.ExpectedEndDate);
+                const today = new Date();
+                const daysUntil = Math.ceil((endDate - today) / (1000 * 60 * 60 * 24));
+
+                let status = 'Active';
+                let statusClass = 'status-active';
+                if (daysUntil <= 0) {
+                    status = 'Expired';
+                    statusClass = 'status-expired';
+                } else if (daysUntil <= 30) {
+                    status = 'Expiring Soon';
+                    statusClass = 'status-expiring';
+                }
+
+                const progressClass = budgetPct > 90 ? 'danger' : budgetPct > 70 ? 'warning' : 'good';
+
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${r.CatalogItemName}</td>
+                    <td>${DEPARTMENTS[r.DepartmentId]}</td>
+                    <td><span class="env-type-badge ${r.EnvironmentType === 'AVE' ? 'env-ave' : 'env-standard'}">${r.EnvironmentType === 'AVE' ? 'AVE (PHI)' : 'Standard'}</span></td>
+                    <td class="text-right">${formatCurrency(cost)}</td>
+                    <td class="text-right">${formatCurrency(budget)}</td>
+                    <td>${GRANTS[r.GrantId]?.name || r.GrantId}</td>
+                    <td>${formatDate(r.ExpectedEndDate)}</td>
+                    <td>
+                        <div style="min-width: 80px;">
+                            <div style="font-size: 11px; color: #666;">${budgetPct.toFixed(0)}%</div>
+                            <div class="progress-bar">
+                                <div class="progress-fill ${progressClass}" style="width: ${Math.min(budgetPct, 100)}%"></div>
+                            </div>
+                        </div>
+                    </td>
+                    <td><span class="status-badge ${statusClass}">${status}</span></td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // ============================================
+        // UPDATE PAGE 2
+        // ============================================
+        function updatePage2() {
+            const costs = getFilteredCostsP2();
+            const budgets = getFilteredBudgetsP2();
+
+            const totalCost = costs.reduce((sum, c) => sum + c.CostUSD, 0);
+            const totalBudget = budgets.reduce((sum, b) => sum + b.BudgetUSD, 0);
+
+            // AVE costs
+            const aveCosts = costs.filter(c => c.EnvironmentId.startsWith('AVE'));
+            const aveTotal = aveCosts.reduce((sum, c) => sum + c.CostUSD, 0);
+            const avePct = totalCost > 0 ? (aveTotal / totalCost * 100) : 0;
+
+            document.getElementById('kpi-ytd-spend').textContent = formatCurrency(totalCost);
+            document.getElementById('kpi-annual-budget').textContent = formatCurrency(totalBudget);
+            document.getElementById('kpi-variance').textContent = formatCurrency(totalBudget - totalCost);
+            document.getElementById('kpi-variance-sub').textContent = totalBudget > totalCost ? 'Under budget' : 'Over budget';
+            document.getElementById('kpi-ave-pct').textContent = `${avePct.toFixed(1)}%`;
+
+            updateMatrixTable();
+            renderSpendTrendChart();
+            renderAveVsStandardChart();
+            renderDeptCompareChart();
+        }
+
+        function updateMatrixTable() {
+            const tbody = document.getElementById('matrix-tbody');
+            tbody.innerHTML = '';
+
+            const costs = getFilteredCostsP2();
+            const budgets = getFilteredBudgetsP2();
+
+            // Aggregate by department and grant
+            const deptData = {};
+
+            costs.forEach(c => {
+                if (!deptData[c.DepartmentId]) {
+                    deptData[c.DepartmentId] = { total: 0, grants: {} };
+                }
+                deptData[c.DepartmentId].total += c.CostUSD;
+                if (!deptData[c.DepartmentId].grants[c.GrantId]) {
+                    deptData[c.DepartmentId].grants[c.GrantId] = 0;
+                }
+                deptData[c.DepartmentId].grants[c.GrantId] += c.CostUSD;
+            });
+
+            const grantBudgets = {};
+            budgets.forEach(b => {
+                grantBudgets[b.GrantId] = (grantBudgets[b.GrantId] || 0) + b.BudgetUSD;
+            });
+
+            let grandTotalCost = 0;
+            let grandTotalBudget = 0;
+
+            Object.keys(deptData).sort().forEach(deptId => {
+                const dept = deptData[deptId];
+                const deptBudget = Object.keys(dept.grants).reduce((sum, grantId) => sum + (grantBudgets[grantId] || 0), 0);
+                const variance = deptBudget - dept.total;
+                const pctUsed = deptBudget > 0 ? (dept.total / deptBudget * 100) : 0;
+
+                grandTotalCost += dept.total;
+                grandTotalBudget += deptBudget;
+
+                // Department row
+                const deptRow = document.createElement('tr');
+                deptRow.className = 'row-header';
+                deptRow.innerHTML = `
+                    <td><strong>${DEPARTMENTS[deptId]}</strong></td>
+                    <td>${formatCurrency(dept.total)}</td>
+                    <td>${formatCurrency(deptBudget)}</td>
+                    <td class="${variance >= 0 ? 'variance-positive' : 'variance-negative'}">${variance >= 0 ? '+' : ''}${formatCurrency(variance)}</td>
+                    <td>${pctUsed.toFixed(1)}%</td>
+                `;
+                tbody.appendChild(deptRow);
+
+                // Grant rows
+                Object.keys(dept.grants).sort().forEach(grantId => {
+                    const grantCost = dept.grants[grantId];
+                    const grantBudget = grantBudgets[grantId] || 0;
+                    const grantVariance = grantBudget - grantCost;
+                    const grantPct = grantBudget > 0 ? (grantCost / grantBudget * 100) : 0;
+
+                    const grantRow = document.createElement('tr');
+                    grantRow.innerHTML = `
+                        <td style="padding-left: 30px;">${GRANTS[grantId]?.name || grantId}</td>
+                        <td>${formatCurrency(grantCost)}</td>
+                        <td>${formatCurrency(grantBudget)}</td>
+                        <td class="${grantVariance >= 0 ? 'variance-positive' : 'variance-negative'}">${grantVariance >= 0 ? '+' : ''}${formatCurrency(grantVariance)}</td>
+                        <td>${grantPct.toFixed(1)}%</td>
+                    `;
+                    tbody.appendChild(grantRow);
+                });
+            });
+
+            // Grand total
+            const grandVariance = grandTotalBudget - grandTotalCost;
+            const grandPct = grandTotalBudget > 0 ? (grandTotalCost / grandTotalBudget * 100) : 0;
+            const totalRow = document.createElement('tr');
+            totalRow.className = 'subtotal';
+            totalRow.innerHTML = `
+                <td><strong>Grand Total</strong></td>
+                <td><strong>${formatCurrency(grandTotalCost)}</strong></td>
+                <td><strong>${formatCurrency(grandTotalBudget)}</strong></td>
+                <td class="${grandVariance >= 0 ? 'variance-positive' : 'variance-negative'}"><strong>${grandVariance >= 0 ? '+' : ''}${formatCurrency(grandVariance)}</strong></td>
+                <td><strong>${grandPct.toFixed(1)}%</strong></td>
+            `;
+            tbody.appendChild(totalRow);
+        }
+
+        // ============================================
+        // UPDATE PAGE 3
+        // ============================================
+        function updatePage3() {
+            const compliance = getFilteredComplianceP3();
+            const environments = getFilteredEnvironmentsP3();
+
+            // Compliance stats
+            const openIssues = compliance.filter(c => c.RemediationStatus === 'Open' || c.RemediationStatus === 'Pending');
+            const totalResources = compliance.length;
+            const compliantResources = compliance.filter(c => !c.NonCompliantFlag || c.RemediationStatus === 'Closed').length;
+            const complianceRate = totalResources > 0 ? (compliantResources / totalResources * 100) : 0;
+            const estSavings = openIssues.reduce((sum, c) => sum + c.EstimatedMonthlyImpactUSD, 0);
+
+            document.getElementById('kpi-compliance').textContent = openIssues.length;
+            document.getElementById('kpi-total-env').textContent = environments.length;
+            document.getElementById('kpi-compliance-rate').textContent = `${complianceRate.toFixed(0)}%`;
+            document.getElementById('kpi-savings').textContent = formatCurrency(estSavings);
+            document.getElementById('compliance-badge').textContent = `${openIssues.length} Open`;
+
+            updateTopCostTable();
+            updateComplianceTable();
+            renderServiceCategoryChart();
+            renderCompliancePolicyChart();
+            renderLifecycleChart();
+        }
+
+        function updateTopCostTable() {
+            const tbody = document.getElementById('top-cost-tbody');
+            tbody.innerHTML = '';
+
+            const costs = getFilteredCostsP3();
+
+            // Get latest month costs
+            const latestMonth = '2026-01';
+            const monthCosts = {};
+            costs.filter(c => c.BillingMonth === latestMonth).forEach(c => {
+                monthCosts[c.EnvironmentId] = (monthCosts[c.EnvironmentId] || 0) + c.CostUSD;
+            });
+
+            // Sort and get top 10
+            const sorted = Object.entries(monthCosts).sort((a, b) => b[1] - a[1]).slice(0, 10);
+
+            sorted.forEach(([envId, cost]) => {
+                const env = DATA.environments.find(e => e.EnvironmentId === envId);
+                const request = DATA.requests.find(r => r.RequestId === env?.RequestId);
+
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${envId}</td>
+                    <td>${request ? DEPARTMENTS[request.DepartmentId] : 'N/A'}</td>
+                    <td><span class="env-type-badge ${envId.startsWith('AVE') ? 'env-ave' : 'env-standard'}">${envId.startsWith('AVE') ? 'AVE' : 'Standard'}</span></td>
+                    <td class="text-right">${formatCurrency(cost)}</td>
+                    <td><span class="status-badge status-active">${env?.EnvironmentStatus || 'Active'}</span></td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function updateComplianceTable() {
+            const tbody = document.getElementById('compliance-tbody');
+            tbody.innerHTML = '';
+
+            const compliance = getFilteredComplianceP3();
+
+            compliance.forEach(c => {
+                let statusClass = 'status-open';
+                if (c.RemediationStatus === 'Closed') statusClass = 'status-closed';
+                else if (c.RemediationStatus === 'Pending') statusClass = 'status-pending';
+
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${c.EnvironmentId}</td>
+                    <td>${c.ViolationType}</td>
+                    <td class="text-right">${formatCurrency(c.EstimatedMonthlyImpactUSD)}</td>
+                    <td><span class="status-badge ${statusClass}">${c.RemediationStatus}</span></td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // ============================================
+        // CHARTS
+        // ============================================
+        let charts = {};
+
+        function renderDeptCostChart() {
+            const ctx = document.getElementById('deptCostChart');
+            if (!ctx) return;
+            if (charts.deptCost) charts.deptCost.destroy();
+
+            const costs = getFilteredCosts();
+            const deptTotals = {};
+            costs.forEach(c => {
+                deptTotals[c.DepartmentId] = (deptTotals[c.DepartmentId] || 0) + c.CostUSD;
+            });
+
+            const labels = Object.keys(deptTotals).map(d => DEPARTMENTS[d]);
+            const data = Object.values(deptTotals);
+
+            charts.deptCost = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Total Cost',
+                        data: data,
+                        backgroundColor: ['#00274C', '#FFCB05', '#2F65A7', '#00B2A9', '#9A3324', '#CFC096', '#75988D', '#003366'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { callback: value => '$' + (value/1000).toFixed(0) + 'K' }
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderSpendTrendChart() {
+            const ctx = document.getElementById('spendTrendChart');
+            if (!ctx) return;
+            if (charts.spendTrend) charts.spendTrend.destroy();
+
+            const costs = getFilteredCostsP2();
+            const budgets = getFilteredBudgetsP2();
+
+            const months = [...new Set(costs.map(c => c.BillingMonth))].sort();
+            const monthlyTotals = {};
+            const monthlyBudgets = {};
+
+            months.forEach(m => {
+                monthlyTotals[m] = costs.filter(c => c.BillingMonth === m).reduce((sum, c) => sum + c.CostUSD, 0);
+                monthlyBudgets[m] = budgets.filter(b => b.BillingMonth === m).reduce((sum, b) => sum + b.BudgetUSD, 0);
+            });
+
+            charts.spendTrend = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: months.map(formatMonth),
+                    datasets: [
+                        {
+                            label: 'Actual Spend',
+                            data: months.map(m => monthlyTotals[m]),
+                            borderColor: '#00274C',
+                            backgroundColor: 'rgba(0, 39, 76, 0.1)',
+                            fill: true,
+                            tension: 0.3
+                        },
+                        {
+                            label: 'Budget',
+                            data: months.map(m => monthlyBudgets[m]),
+                            borderColor: '#FFCB05',
+                            borderDash: [5, 5],
+                            fill: false,
+                            tension: 0.1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom' } },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { callback: value => '$' + (value/1000).toFixed(0) + 'K' }
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderAveVsStandardChart() {
+            const ctx = document.getElementById('aveVsStandardChart');
+            if (!ctx) return;
+            if (charts.aveVsStandard) charts.aveVsStandard.destroy();
+
+            const costs = getFilteredCostsP2();
+            const months = [...new Set(costs.map(c => c.BillingMonth))].sort();
+            const aveByMonth = {};
+            const stdByMonth = {};
+
+            months.forEach(m => {
+                const monthCosts = costs.filter(c => c.BillingMonth === m);
+                aveByMonth[m] = monthCosts.filter(c => c.EnvironmentId.startsWith('AVE')).reduce((sum, c) => sum + c.CostUSD, 0);
+                stdByMonth[m] = monthCosts.filter(c => !c.EnvironmentId.startsWith('AVE')).reduce((sum, c) => sum + c.CostUSD, 0);
+            });
+
+            charts.aveVsStandard = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: months.map(formatMonth),
+                    datasets: [
+                        {
+                            label: 'AVE (PHI)',
+                            data: months.map(m => aveByMonth[m]),
+                            backgroundColor: '#00274C'
+                        },
+                        {
+                            label: 'Standard (Non-PHI)',
+                            data: months.map(m => stdByMonth[m]),
+                            backgroundColor: '#2F65A7'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom' } },
+                    scales: {
+                        x: { stacked: true },
+                        y: {
+                            stacked: true,
+                            beginAtZero: true,
+                            ticks: { callback: value => '$' + (value/1000).toFixed(0) + 'K' }
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderDeptCompareChart() {
+            const ctx = document.getElementById('deptCompareChart');
+            if (!ctx) return;
+            if (charts.deptCompare) charts.deptCompare.destroy();
+
+            const costs = getFilteredCostsP2();
+            const budgets = getFilteredBudgetsP2();
+
+            const deptTotals = {};
+            const deptBudgets = {};
+
+            costs.forEach(c => {
+                deptTotals[c.DepartmentId] = (deptTotals[c.DepartmentId] || 0) + c.CostUSD;
+            });
+            budgets.forEach(b => {
+                deptBudgets[b.DepartmentId] = (deptBudgets[b.DepartmentId] || 0) + b.BudgetUSD;
+            });
+
+            // Only show departments that have data
+            const depts = Object.keys(deptTotals).length > 0 ? Object.keys(deptTotals) : Object.keys(DEPARTMENTS);
+
+            charts.deptCompare = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: depts.map(d => DEPARTMENTS[d]),
+                    datasets: [
+                        {
+                            label: 'Actual Spend',
+                            data: depts.map(d => deptTotals[d] || 0),
+                            backgroundColor: '#00274C'
+                        },
+                        {
+                            label: 'Budget',
+                            data: depts.map(d => deptBudgets[d] || 0),
+                            backgroundColor: '#FFCB05'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom' } },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { callback: value => '$' + (value/1000).toFixed(0) + 'K' }
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderServiceCategoryChart() {
+            const ctx = document.getElementById('serviceCategoryChart');
+            if (!ctx) return;
+            if (charts.serviceCategory) charts.serviceCategory.destroy();
+
+            const costs = getFilteredCostsP3();
+            const categoryTotals = {};
+            costs.forEach(c => {
+                categoryTotals[c.ServiceCategory] = (categoryTotals[c.ServiceCategory] || 0) + c.CostUSD;
+            });
+
+            charts.serviceCategory = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(categoryTotals),
+                    datasets: [{
+                        data: Object.values(categoryTotals),
+                        backgroundColor: ['#00274C', '#FFCB05', '#2F65A7', '#00B2A9', '#9A3324', '#CFC096'],
+                        borderWidth: 2,
+                        borderColor: '#fff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'right' },
+                        tooltip: {
+                            callbacks: {
+                                label: ctx => ctx.label + ': ' + formatCurrency(ctx.raw)
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderCompliancePolicyChart() {
+            const ctx = document.getElementById('compliancePolicyChart');
+            if (!ctx) return;
+            if (charts.compliancePolicy) charts.compliancePolicy.destroy();
+
+            const compliance = getFilteredComplianceP3();
+            const policyCount = {};
+            compliance.filter(c => c.NonCompliantFlag).forEach(c => {
+                policyCount[c.PolicyName] = (policyCount[c.PolicyName] || 0) + 1;
+            });
+
+            charts.compliancePolicy = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(policyCount),
+                    datasets: [{
+                        label: 'Violations',
+                        data: Object.values(policyCount),
+                        backgroundColor: '#9A3324'
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { beginAtZero: true }
+                    }
+                }
+            });
+        }
+
+        function renderLifecycleChart() {
+            const ctx = document.getElementById('lifecycleChart');
+            if (!ctx) return;
+            if (charts.lifecycle) charts.lifecycle.destroy();
+
+            // Filter requests based on Page 3 filters
+            const filteredRequests = DATA.requests.filter(r => {
+                if (currentFilters.deptP3 !== 'all' && r.DepartmentId !== currentFilters.deptP3) return false;
+                if (currentFilters.envTypeP3 !== 'all') {
+                    if (currentFilters.envTypeP3 === 'AVE' && r.EnvironmentType !== 'AVE') return false;
+                    if (currentFilters.envTypeP3 === 'Standard' && r.EnvironmentType !== 'Standard') return false;
+                }
+                return true;
+            });
+
+            const today = new Date();
+            let active = 0, expiringSoon = 0, expired = 0;
+
+            filteredRequests.forEach(r => {
+                const endDate = new Date(r.ExpectedEndDate);
+                const daysUntil = Math.ceil((endDate - today) / (1000 * 60 * 60 * 24));
+                if (daysUntil <= 0) expired++;
+                else if (daysUntil <= 30) expiringSoon++;
+                else active++;
+            });
+
+            charts.lifecycle = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Active (>30 days)', 'Expiring Soon (≤30 days)', 'Expired'],
+                    datasets: [{
+                        label: 'Environments',
+                        data: [active, expiringSoon, expired],
+                        backgroundColor: ['#00B2A9', '#FFCB05', '#9A3324']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+        }
+
+        // ============================================
+        // UTILITY FUNCTIONS
+        // ============================================
+        function formatCurrency(value) {
+            return '$' + value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        function formatDate(dateStr) {
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        }
+
+        function formatMonth(monthStr) {
+            const [year, month] = monthStr.split('-');
+            const date = new Date(year, parseInt(month) - 1);
+            return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+        }
+
+        // ============================================
+        // INITIALIZATION
+        // ============================================
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-US', {
+                month: 'long', day: 'numeric', year: 'numeric'
+            });
+
+            populateFilters();
+            applyFilters();
+            showPage('page1');
+        });
+    </script>
+</body>
+</html>
