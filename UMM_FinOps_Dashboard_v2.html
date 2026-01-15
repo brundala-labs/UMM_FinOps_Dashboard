@@ -71,15 +71,54 @@
         .header-info { font-size: 13px; text-align: right; }
 
         .persona-selector {
-            display: flex; align-items: center; gap: 8px;
-            background: rgba(255,255,255,0.1);
-            padding: 8px 12px; border-radius: 8px;
+            display: flex; align-items: center; gap: 16px;
+            background: var(--umm-maize);
+            padding: 16px 28px; border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+            margin-left: 40px;
         }
-        .persona-selector label { font-size: 11px; text-transform: uppercase; opacity: 0.8; }
+        .persona-selector label {
+            font-size: 18px;
+            font-weight: 800;
+            text-transform: uppercase;
+            color: var(--umm-blue);
+            letter-spacing: 1px;
+        }
         .persona-selector select {
-            padding: 6px 12px; border: none; border-radius: 4px;
-            font-size: 13px; font-weight: 500;
-            background: white; color: var(--umm-blue); cursor: pointer;
+            padding: 14px 24px;
+            border: 3px solid var(--umm-blue);
+            border-radius: 8px;
+            font-size: 20px;
+            font-weight: 700;
+            background: white;
+            color: var(--umm-blue);
+            cursor: pointer;
+            min-width: 320px;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2300274C' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 20px;
+            padding-right: 45px;
+        }
+        .persona-selector select:focus {
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(0,39,76,0.3);
+        }
+        .persona-selector select option {
+            font-size: 18px;
+            padding: 16px 20px;
+            font-weight: 600;
+            background: white;
+            color: var(--umm-blue);
+            line-height: 2;
+        }
+        .persona-selector select option:hover,
+        .persona-selector select option:checked {
+            background: var(--umm-maize);
+            color: var(--umm-blue);
         }
 
         /* Global Filter Bar */
@@ -406,6 +445,59 @@
         .env-ave { background: var(--umm-blue); color: white; }
         .env-standard { background: var(--umm-blue-light); color: white; }
 
+        .servicenow-ticket {
+            display: inline-block;
+            padding: 4px 10px;
+            background: #E3F2FD;
+            color: #1565C0;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            font-family: 'Consolas', 'Monaco', monospace;
+            border: 1px solid #90CAF9;
+        }
+
+        .grant-name {
+            display: inline-block;
+            padding: 4px 10px;
+            background: #FFF3E0;
+            color: #E65100;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            border: 1px solid #FFCC80;
+            max-width: 200px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .irb-number {
+            display: inline-block;
+            padding: 4px 10px;
+            background: #F3E5F5;
+            color: #7B1FA2;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            font-family: 'Consolas', 'Monaco', monospace;
+            border: 1px solid #CE93D8;
+        }
+
+        .irb-status-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .irb-approved { background: #E8F5E9; color: #2E7D32; border: 1px solid #A5D6A7; }
+        .irb-pending { background: #FFF8E1; color: #F57F17; border: 1px solid #FFE082; }
+        .irb-under-review { background: #E3F2FD; color: #1565C0; border: 1px solid #90CAF9; }
+        .irb-exempt { background: #ECEFF1; color: #546E7A; border: 1px solid #B0BEC5; }
+        .irb-closed { background: #FAFAFA; color: #757575; border: 1px solid #E0E0E0; }
+
         .progress-bar {
             height: 8px;
             background: #E1E5EB;
@@ -608,10 +700,8 @@
                 <h1>FinOps Cloud Cost Management</h1>
                 <p>University of Michigan Medicine - Research Computing</p>
             </div>
-        </div>
-        <div class="header-right">
             <div class="persona-selector">
-                <label>View As:</label>
+                <label>VIEW AS:</label>
                 <select id="persona-select" onchange="switchPersona()">
                     <option value="finance">Finance & Research Operations</option>
                     <option value="pi">Principal Investigator (PI)</option>
@@ -619,6 +709,8 @@
                     <option value="governance">Governance (Dept. Admin)</option>
                 </select>
             </div>
+        </div>
+        <div class="header-right">
             <div class="header-info">
                 <div>Report Generated: <span id="currentDate"></span></div>
                 <div>Data Source: Azure Cost Management + ServiceNow</div>
@@ -774,6 +866,36 @@
                     </div>
                 </div>
             </div>
+
+            <div class="card">
+                <div class="card-header">
+                    All Projects Detail
+                    <span class="badge" id="finance-projects-badge">0 Projects</span>
+                </div>
+                <div class="card-body">
+                    <div class="table-scroll">
+                        <table class="data-table" id="finance-projects-table">
+                            <thead>
+                                <tr>
+                                    <th>ServiceNow #</th>
+                                    <th>Project Name</th>
+                                    <th>Grant</th>
+                                    <th>IRB #</th>
+                                    <th>IRB Status</th>
+                                    <th>PI</th>
+                                    <th>Department</th>
+                                    <th>Type</th>
+                                    <th class="text-right">Monthly Cost</th>
+                                    <th>Budget Status</th>
+                                    <th>End Date</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="finance-projects-tbody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- PAGE: PI Personal View -->
@@ -834,10 +956,13 @@
                         <table class="data-table" id="pi-projects-table">
                             <thead>
                                 <tr>
+                                    <th>ServiceNow #</th>
                                     <th>Project Name</th>
+                                    <th>Grant</th>
+                                    <th>IRB #</th>
+                                    <th>IRB Status</th>
                                     <th>Type</th>
                                     <th class="text-right">Monthly Cost</th>
-                                    <th>Grant</th>
                                     <th>Budget Usage</th>
                                     <th>End Date</th>
                                     <th>Status</th>
@@ -933,6 +1058,10 @@
                         <table class="data-table" id="ops-compliance-table">
                             <thead>
                                 <tr>
+                                    <th>ServiceNow #</th>
+                                    <th>Grant</th>
+                                    <th>IRB #</th>
+                                    <th>IRB Status</th>
                                     <th>Severity</th>
                                     <th>Type</th>
                                     <th>Environment</th>
@@ -1128,57 +1257,57 @@
         // EXPANDED REQUESTS with varied statuses
         const REQUESTS = [
             // Dr. Sarah Chen - Cardiology (WITHIN BUDGET - 2 active projects)
-            { RequestId: "RITM001001", CatalogItemName: "Cardiac Arrhythmia Genomics Analysis", PIName: "Dr. Sarah Chen", EnvironmentType: "Standard", DepartmentId: "DEPT-CARD", Division: "Electrophysiology", GrantId: "GRANT-NIH-HL-2024-01", ExpectedEndDate: "2026-10-15", RequestStatus: "Active" },
-            { RequestId: "RITM001010", CatalogItemName: "Heart Failure Predictive Analytics", PIName: "Dr. Sarah Chen", EnvironmentType: "Standard", DepartmentId: "DEPT-CARD", Division: "General Cardiology", GrantId: "GRANT-AHA-2025-02", ExpectedEndDate: "2026-08-30", RequestStatus: "Active" },
+            { RequestId: "RITM001001", CatalogItemName: "Cardiac Arrhythmia Genomics Analysis", PIName: "Dr. Sarah Chen", EnvironmentType: "Standard", DepartmentId: "DEPT-CARD", Division: "Electrophysiology", GrantId: "GRANT-NIH-HL-2024-01", ExpectedEndDate: "2026-10-15", RequestStatus: "Active", IRBNumber: "HUM00198234", IRBStatus: "Approved" },
+            { RequestId: "RITM001010", CatalogItemName: "Heart Failure Predictive Analytics", PIName: "Dr. Sarah Chen", EnvironmentType: "Standard", DepartmentId: "DEPT-CARD", Division: "General Cardiology", GrantId: "GRANT-AHA-2025-02", ExpectedEndDate: "2026-08-30", RequestStatus: "Active", IRBNumber: "HUM00201456", IRBStatus: "Approved" },
 
             // Dr. Michael Torres - Oncology (OVERSPEND - high cost projects)
-            { RequestId: "RITM001002", CatalogItemName: "Breast Cancer Biomarker Discovery (PHI)", PIName: "Dr. Michael Torres", EnvironmentType: "AVE", DepartmentId: "DEPT-ONC", Division: "Medical Oncology", GrantId: "GRANT-NIH-CA-2025-09", ExpectedEndDate: "2026-12-31", RequestStatus: "Active" },
-            { RequestId: "RITM001009", CatalogItemName: "Tumor Genomics Sequencing Cluster", PIName: "Dr. Michael Torres", EnvironmentType: "Standard", DepartmentId: "DEPT-ONC", Division: "Medical Oncology", GrantId: "GRANT-NCI-2024-15", ExpectedEndDate: "2026-06-30", RequestStatus: "Active" },
-            { RequestId: "RITM001020", CatalogItemName: "Cancer Drug Response Modeling", PIName: "Dr. Michael Torres", EnvironmentType: "AVE", DepartmentId: "DEPT-ONC", Division: "Medical Oncology", GrantId: "GRANT-NIH-CA-2025-09", ExpectedEndDate: "2026-09-15", RequestStatus: "Active" },
+            { RequestId: "RITM001002", CatalogItemName: "Breast Cancer Biomarker Discovery (PHI)", PIName: "Dr. Michael Torres", EnvironmentType: "AVE", DepartmentId: "DEPT-ONC", Division: "Medical Oncology", GrantId: "GRANT-NIH-CA-2025-09", ExpectedEndDate: "2026-12-31", RequestStatus: "Active", IRBNumber: "HUM00187562", IRBStatus: "Approved" },
+            { RequestId: "RITM001009", CatalogItemName: "Tumor Genomics Sequencing Cluster", PIName: "Dr. Michael Torres", EnvironmentType: "Standard", DepartmentId: "DEPT-ONC", Division: "Medical Oncology", GrantId: "GRANT-NCI-2024-15", ExpectedEndDate: "2026-06-30", RequestStatus: "Active", IRBNumber: "HUM00187562", IRBStatus: "Approved" },
+            { RequestId: "RITM001020", CatalogItemName: "Cancer Drug Response Modeling", PIName: "Dr. Michael Torres", EnvironmentType: "AVE", DepartmentId: "DEPT-ONC", Division: "Medical Oncology", GrantId: "GRANT-NIH-CA-2025-09", ExpectedEndDate: "2026-09-15", RequestStatus: "Active", IRBNumber: "HUM00205891", IRBStatus: "Under Review" },
 
             // Dr. Emily Watson - Neurology (AT RISK - 85% budget used)
-            { RequestId: "RITM001003", CatalogItemName: "Alzheimer's Disease MRI Processing", PIName: "Dr. Emily Watson", EnvironmentType: "Standard", DepartmentId: "DEPT-NEUR", Division: "Movement Disorders", GrantId: "GRANT-NIH-NS-2024-15", ExpectedEndDate: "2026-08-30", RequestStatus: "Active" },
-            { RequestId: "RITM001011", CatalogItemName: "Parkinson's Disease Registry (PHI)", PIName: "Dr. Emily Watson", EnvironmentType: "AVE", DepartmentId: "DEPT-NEUR", Division: "Movement Disorders", GrantId: "GRANT-NIH-NS-2024-15", ExpectedEndDate: "2026-08-30", RequestStatus: "Active" },
+            { RequestId: "RITM001003", CatalogItemName: "Alzheimer's Disease MRI Processing", PIName: "Dr. Emily Watson", EnvironmentType: "Standard", DepartmentId: "DEPT-NEUR", Division: "Movement Disorders", GrantId: "GRANT-NIH-NS-2024-15", ExpectedEndDate: "2026-08-30", RequestStatus: "Active", IRBNumber: "HUM00176543", IRBStatus: "Approved" },
+            { RequestId: "RITM001011", CatalogItemName: "Parkinson's Disease Registry (PHI)", PIName: "Dr. Emily Watson", EnvironmentType: "AVE", DepartmentId: "DEPT-NEUR", Division: "Movement Disorders", GrantId: "GRANT-NIH-NS-2024-15", ExpectedEndDate: "2026-08-30", RequestStatus: "Active", IRBNumber: "HUM00189234", IRBStatus: "Approved" },
 
             // Dr. James Park - Pediatrics (COMPLETED project + ACTIVE within budget)
-            { RequestId: "RITM001004", CatalogItemName: "Pediatric Asthma Outcomes Study (PHI)", PIName: "Dr. James Park", EnvironmentType: "AVE", DepartmentId: "DEPT-PEDS", Division: "General Pediatrics", GrantId: "GRANT-PCORI-2025-03", ExpectedEndDate: "2026-02-15", RequestStatus: "Expiring" },
-            { RequestId: "RITM001021", CatalogItemName: "Childhood Obesity Analysis (Completed)", PIName: "Dr. James Park", EnvironmentType: "Standard", DepartmentId: "DEPT-PEDS", Division: "General Pediatrics", GrantId: "GRANT-PEDS-2024-08", ExpectedEndDate: "2025-12-31", RequestStatus: "Completed" },
+            { RequestId: "RITM001004", CatalogItemName: "Pediatric Asthma Outcomes Study (PHI)", PIName: "Dr. James Park", EnvironmentType: "AVE", DepartmentId: "DEPT-PEDS", Division: "General Pediatrics", GrantId: "GRANT-PCORI-2025-03", ExpectedEndDate: "2026-02-15", RequestStatus: "Expiring", IRBNumber: "HUM00165432", IRBStatus: "Approved" },
+            { RequestId: "RITM001021", CatalogItemName: "Childhood Obesity Analysis (Completed)", PIName: "Dr. James Park", EnvironmentType: "Standard", DepartmentId: "DEPT-PEDS", Division: "General Pediatrics", GrantId: "GRANT-PEDS-2024-08", ExpectedEndDate: "2025-12-31", RequestStatus: "Completed", IRBNumber: "HUM00154321", IRBStatus: "Closed" },
 
             // Dr. Amanda Foster - Surgery (WITHIN BUDGET)
-            { RequestId: "RITM001005", CatalogItemName: "Robotic Surgery ML Training", PIName: "Dr. Amanda Foster", EnvironmentType: "Standard", DepartmentId: "DEPT-SURG", Division: "General Surgery", GrantId: "GRANT-DOD-2024-22", ExpectedEndDate: "2026-11-30", RequestStatus: "Active" },
-            { RequestId: "RITM001012", CatalogItemName: "Surgical Outcomes DevTest Sandbox", PIName: "Dr. Amanda Foster", EnvironmentType: "Standard", DepartmentId: "DEPT-SURG", Division: "General Surgery", GrantId: "GRANT-DOD-2024-22", ExpectedEndDate: "2026-03-15", RequestStatus: "Expiring" },
+            { RequestId: "RITM001005", CatalogItemName: "Robotic Surgery ML Training", PIName: "Dr. Amanda Foster", EnvironmentType: "Standard", DepartmentId: "DEPT-SURG", Division: "General Surgery", GrantId: "GRANT-DOD-2024-22", ExpectedEndDate: "2026-11-30", RequestStatus: "Active", IRBNumber: "N/A", IRBStatus: "Exempt" },
+            { RequestId: "RITM001012", CatalogItemName: "Surgical Outcomes DevTest Sandbox", PIName: "Dr. Amanda Foster", EnvironmentType: "Standard", DepartmentId: "DEPT-SURG", Division: "General Surgery", GrantId: "GRANT-DOD-2024-22", ExpectedEndDate: "2026-03-15", RequestStatus: "Expiring", IRBNumber: "N/A", IRBStatus: "Exempt" },
 
             // Dr. Robert Kim - Pathology (OVERSPEND)
-            { RequestId: "RITM001006", CatalogItemName: "Digital Pathology AI Diagnostics (PHI)", PIName: "Dr. Robert Kim", EnvironmentType: "AVE", DepartmentId: "DEPT-PATH", Division: "Molecular Pathology", GrantId: "GRANT-NIH-AI-2025-07", ExpectedEndDate: "2026-09-15", RequestStatus: "Active" },
-            { RequestId: "RITM001022", CatalogItemName: "Tissue Analysis GPU Cluster", PIName: "Dr. Robert Kim", EnvironmentType: "Standard", DepartmentId: "DEPT-PATH", Division: "Molecular Pathology", GrantId: "GRANT-NIH-AI-2025-07", ExpectedEndDate: "2026-07-30", RequestStatus: "Active" },
+            { RequestId: "RITM001006", CatalogItemName: "Digital Pathology AI Diagnostics (PHI)", PIName: "Dr. Robert Kim", EnvironmentType: "AVE", DepartmentId: "DEPT-PATH", Division: "Molecular Pathology", GrantId: "GRANT-NIH-AI-2025-07", ExpectedEndDate: "2026-09-15", RequestStatus: "Active", IRBNumber: "HUM00192876", IRBStatus: "Approved" },
+            { RequestId: "RITM001022", CatalogItemName: "Tissue Analysis GPU Cluster", PIName: "Dr. Robert Kim", EnvironmentType: "Standard", DepartmentId: "DEPT-PATH", Division: "Molecular Pathology", GrantId: "GRANT-NIH-AI-2025-07", ExpectedEndDate: "2026-07-30", RequestStatus: "Active", IRBNumber: "HUM00192876", IRBStatus: "Approved" },
 
             // Dr. Lisa Patel - Radiology (UNDERUTILIZED - only 25% budget used)
-            { RequestId: "RITM001007", CatalogItemName: "CT Imaging Reconstruction Pipeline", PIName: "Dr. Lisa Patel", EnvironmentType: "Standard", DepartmentId: "DEPT-RADI", Division: "Diagnostic Radiology", GrantId: "GRANT-AHRQ-2024-11", ExpectedEndDate: "2026-06-30", RequestStatus: "Active" },
+            { RequestId: "RITM001007", CatalogItemName: "CT Imaging Reconstruction Pipeline", PIName: "Dr. Lisa Patel", EnvironmentType: "Standard", DepartmentId: "DEPT-RADI", Division: "Diagnostic Radiology", GrantId: "GRANT-AHRQ-2024-11", ExpectedEndDate: "2026-06-30", RequestStatus: "Active", IRBNumber: "N/A", IRBStatus: "Exempt" },
 
             // Dr. David Liu - Psychiatry (COMPLETED + WITHIN BUDGET on active)
-            { RequestId: "RITM001008", CatalogItemName: "Depression Treatment Response (PHI)", PIName: "Dr. David Liu", EnvironmentType: "AVE", DepartmentId: "DEPT-PSYC", Division: "Adult Psychiatry", GrantId: "GRANT-NIMH-2025-04", ExpectedEndDate: "2026-04-30", RequestStatus: "Active" },
-            { RequestId: "RITM001023", CatalogItemName: "Mental Health ML Models (Completed)", PIName: "Dr. David Liu", EnvironmentType: "Standard", DepartmentId: "DEPT-PSYC", Division: "Adult Psychiatry", GrantId: "GRANT-NIMH-2024-12", ExpectedEndDate: "2025-11-30", RequestStatus: "Completed" },
+            { RequestId: "RITM001008", CatalogItemName: "Depression Treatment Response (PHI)", PIName: "Dr. David Liu", EnvironmentType: "AVE", DepartmentId: "DEPT-PSYC", Division: "Adult Psychiatry", GrantId: "GRANT-NIMH-2025-04", ExpectedEndDate: "2026-04-30", RequestStatus: "Active", IRBNumber: "HUM00178654", IRBStatus: "Approved" },
+            { RequestId: "RITM001023", CatalogItemName: "Mental Health ML Models (Completed)", PIName: "Dr. David Liu", EnvironmentType: "Standard", DepartmentId: "DEPT-PSYC", Division: "Adult Psychiatry", GrantId: "GRANT-NIMH-2024-12", ExpectedEndDate: "2025-11-30", RequestStatus: "Completed", IRBNumber: "HUM00156789", IRBStatus: "Closed" },
 
             // Dr. Jennifer Adams - Cardiology (AT RISK - new PI)
-            { RequestId: "RITM001024", CatalogItemName: "Cardiac MRI AI Analysis (PHI)", PIName: "Dr. Jennifer Adams", EnvironmentType: "AVE", DepartmentId: "DEPT-CARD", Division: "Interventional", GrantId: "GRANT-NIH-HL-2025-18", ExpectedEndDate: "2026-12-15", RequestStatus: "Active" },
-            { RequestId: "RITM001025", CatalogItemName: "Echo Analysis Pipeline", PIName: "Dr. Jennifer Adams", EnvironmentType: "Standard", DepartmentId: "DEPT-CARD", Division: "Interventional", GrantId: "GRANT-NIH-HL-2025-18", ExpectedEndDate: "2026-10-30", RequestStatus: "Active" },
+            { RequestId: "RITM001024", CatalogItemName: "Cardiac MRI AI Analysis (PHI)", PIName: "Dr. Jennifer Adams", EnvironmentType: "AVE", DepartmentId: "DEPT-CARD", Division: "Interventional", GrantId: "GRANT-NIH-HL-2025-18", ExpectedEndDate: "2026-12-15", RequestStatus: "Active", IRBNumber: "HUM00207123", IRBStatus: "Approved" },
+            { RequestId: "RITM001025", CatalogItemName: "Echo Analysis Pipeline", PIName: "Dr. Jennifer Adams", EnvironmentType: "Standard", DepartmentId: "DEPT-CARD", Division: "Interventional", GrantId: "GRANT-NIH-HL-2025-18", ExpectedEndDate: "2026-10-30", RequestStatus: "Active", IRBNumber: "HUM00207123", IRBStatus: "Approved" },
 
             // Dr. Kevin Wright - Oncology (WITHIN BUDGET)
-            { RequestId: "RITM001026", CatalogItemName: "Cancer Screening ML Model", PIName: "Dr. Kevin Wright", EnvironmentType: "Standard", DepartmentId: "DEPT-ONC", Division: "Surgical Oncology", GrantId: "GRANT-DOD-ONC-2025-05", ExpectedEndDate: "2026-11-30", RequestStatus: "Active" },
+            { RequestId: "RITM001026", CatalogItemName: "Cancer Screening ML Model", PIName: "Dr. Kevin Wright", EnvironmentType: "Standard", DepartmentId: "DEPT-ONC", Division: "Surgical Oncology", GrantId: "GRANT-DOD-ONC-2025-05", ExpectedEndDate: "2026-11-30", RequestStatus: "Active", IRBNumber: "HUM00203456", IRBStatus: "Pending" },
 
             // Dr. Maria Garcia - Neurology (COMPLETED + OVERSPEND on active)
-            { RequestId: "RITM001027", CatalogItemName: "Stroke Risk Prediction (PHI)", PIName: "Dr. Maria Garcia", EnvironmentType: "AVE", DepartmentId: "DEPT-NEUR", Division: "General Neurology", GrantId: "GRANT-NINDS-2024-20", ExpectedEndDate: "2026-05-30", RequestStatus: "Active" },
-            { RequestId: "RITM001028", CatalogItemName: "MS Lesion Analysis (Completed)", PIName: "Dr. Maria Garcia", EnvironmentType: "Standard", DepartmentId: "DEPT-NEUR", Division: "Neuro-Oncology", GrantId: "GRANT-NINDS-2023-11", ExpectedEndDate: "2025-10-31", RequestStatus: "Completed" },
+            { RequestId: "RITM001027", CatalogItemName: "Stroke Risk Prediction (PHI)", PIName: "Dr. Maria Garcia", EnvironmentType: "AVE", DepartmentId: "DEPT-NEUR", Division: "General Neurology", GrantId: "GRANT-NINDS-2024-20", ExpectedEndDate: "2026-05-30", RequestStatus: "Active", IRBNumber: "HUM00185432", IRBStatus: "Approved" },
+            { RequestId: "RITM001028", CatalogItemName: "MS Lesion Analysis (Completed)", PIName: "Dr. Maria Garcia", EnvironmentType: "Standard", DepartmentId: "DEPT-NEUR", Division: "Neuro-Oncology", GrantId: "GRANT-NINDS-2023-11", ExpectedEndDate: "2025-10-31", RequestStatus: "Completed", IRBNumber: "HUM00167890", IRBStatus: "Closed" },
 
             // Dr. Thomas Brown - Surgery (SEVERE OVERSPEND - 130% over budget, high compute costs)
-            { RequestId: "RITM001029", CatalogItemName: "Trauma Surgery AI Training (PHI)", PIName: "Dr. Thomas Brown", EnvironmentType: "AVE", DepartmentId: "DEPT-SURG", Division: "General Surgery", GrantId: "GRANT-DOD-SURG-2025-01", ExpectedEndDate: "2026-12-31", RequestStatus: "Active" },
-            { RequestId: "RITM001030", CatalogItemName: "Surgical Video Analysis GPU Cluster", PIName: "Dr. Thomas Brown", EnvironmentType: "Standard", DepartmentId: "DEPT-SURG", Division: "General Surgery", GrantId: "GRANT-DOD-SURG-2025-01", ExpectedEndDate: "2026-09-30", RequestStatus: "Active" },
-            { RequestId: "RITM001031", CatalogItemName: "Minimally Invasive Procedure Modeling", PIName: "Dr. Thomas Brown", EnvironmentType: "Standard", DepartmentId: "DEPT-SURG", Division: "Vascular", GrantId: "GRANT-NIH-SURG-2024-09", ExpectedEndDate: "2026-06-30", RequestStatus: "Active" },
+            { RequestId: "RITM001029", CatalogItemName: "Trauma Surgery AI Training (PHI)", PIName: "Dr. Thomas Brown", EnvironmentType: "AVE", DepartmentId: "DEPT-SURG", Division: "General Surgery", GrantId: "GRANT-DOD-SURG-2025-01", ExpectedEndDate: "2026-12-31", RequestStatus: "Active", IRBNumber: "HUM00209876", IRBStatus: "Approved" },
+            { RequestId: "RITM001030", CatalogItemName: "Surgical Video Analysis GPU Cluster", PIName: "Dr. Thomas Brown", EnvironmentType: "Standard", DepartmentId: "DEPT-SURG", Division: "General Surgery", GrantId: "GRANT-DOD-SURG-2025-01", ExpectedEndDate: "2026-09-30", RequestStatus: "Active", IRBNumber: "HUM00209876", IRBStatus: "Approved" },
+            { RequestId: "RITM001031", CatalogItemName: "Minimally Invasive Procedure Modeling", PIName: "Dr. Thomas Brown", EnvironmentType: "Standard", DepartmentId: "DEPT-SURG", Division: "Vascular", GrantId: "GRANT-NIH-SURG-2024-09", ExpectedEndDate: "2026-06-30", RequestStatus: "Active", IRBNumber: "HUM00211234", IRBStatus: "Under Review" },
 
             // Dr. Rachel Lee - Pediatrics (OVERSPEND - 122% over budget)
-            { RequestId: "RITM001032", CatalogItemName: "Pediatric Cancer Genomics Sequencing (PHI)", PIName: "Dr. Rachel Lee", EnvironmentType: "AVE", DepartmentId: "DEPT-PEDS", Division: "Peds Oncology", GrantId: "GRANT-NIH-PEDS-2025-06", ExpectedEndDate: "2026-11-30", RequestStatus: "Active" },
-            { RequestId: "RITM001033", CatalogItemName: "Childhood Leukemia ML Models", PIName: "Dr. Rachel Lee", EnvironmentType: "Standard", DepartmentId: "DEPT-PEDS", Division: "Peds Oncology", GrantId: "GRANT-NIH-PEDS-2025-06", ExpectedEndDate: "2026-08-30", RequestStatus: "Active" },
-            { RequestId: "RITM001034", CatalogItemName: "Diabetes Biomarker Analysis (PHI)", PIName: "Dr. Rachel Lee", EnvironmentType: "AVE", DepartmentId: "DEPT-PEDS", Division: "General Pediatrics", GrantId: "GRANT-PCORI-PEDS-2024-14", ExpectedEndDate: "2026-07-31", RequestStatus: "Active" }
+            { RequestId: "RITM001032", CatalogItemName: "Pediatric Cancer Genomics Sequencing (PHI)", PIName: "Dr. Rachel Lee", EnvironmentType: "AVE", DepartmentId: "DEPT-PEDS", Division: "Peds Oncology", GrantId: "GRANT-NIH-PEDS-2025-06", ExpectedEndDate: "2026-11-30", RequestStatus: "Active", IRBNumber: "HUM00206543", IRBStatus: "Approved" },
+            { RequestId: "RITM001033", CatalogItemName: "Childhood Leukemia ML Models", PIName: "Dr. Rachel Lee", EnvironmentType: "Standard", DepartmentId: "DEPT-PEDS", Division: "Peds Oncology", GrantId: "GRANT-NIH-PEDS-2025-06", ExpectedEndDate: "2026-08-30", RequestStatus: "Active", IRBNumber: "HUM00206543", IRBStatus: "Approved" },
+            { RequestId: "RITM001034", CatalogItemName: "Diabetes Biomarker Analysis (PHI)", PIName: "Dr. Rachel Lee", EnvironmentType: "AVE", DepartmentId: "DEPT-PEDS", Division: "General Pediatrics", GrantId: "GRANT-PCORI-PEDS-2024-14", ExpectedEndDate: "2026-07-31", RequestStatus: "Active", IRBNumber: "HUM00208765", IRBStatus: "Pending" }
         ];
 
         // Generate environments from requests
@@ -1405,6 +1534,17 @@
             return { status: 'ontrack', label: 'On Track', class: 'budget-ontrack' };
         }
 
+        function getIRBStatusClass(status) {
+            const statusMap = {
+                'Approved': 'irb-approved',
+                'Pending': 'irb-pending',
+                'Under Review': 'irb-under-review',
+                'Exempt': 'irb-exempt',
+                'Closed': 'irb-closed'
+            };
+            return statusMap[status] || 'irb-pending';
+        }
+
         function refreshAllViews() {
             if (currentPersona === 'finance') updateFinanceView();
             if (currentPersona === 'pi') updatePIView();
@@ -1507,7 +1647,56 @@
             document.getElementById('kpi-finance-completed').textContent = completedCount;
 
             updateFinanceMatrix(filteredRequests, costs, budgets);
+            updateFinanceProjectsTable(filteredRequests, costs, budgets);
             renderFinanceCharts(costs, budgets);
+        }
+
+        function updateFinanceProjectsTable(requests, costs, budgets) {
+            const tbody = document.getElementById('finance-projects-tbody');
+            tbody.innerHTML = '';
+            document.getElementById('finance-projects-badge').textContent = `${requests.length} Projects`;
+
+            const costByEnv = {};
+            costs.forEach(c => { costByEnv[c.EnvironmentId] = (costByEnv[c.EnvironmentId] || 0) + c.CostUSD; });
+
+            const grantBudgets = {}, grantCosts = {};
+            budgets.forEach(b => { grantBudgets[b.GrantId] = (grantBudgets[b.GrantId] || 0) + b.BudgetUSD; });
+            costs.forEach(c => { grantCosts[c.GrantId] = (grantCosts[c.GrantId] || 0) + c.CostUSD; });
+
+            requests.forEach(r => {
+                const env = ENVIRONMENTS.find(e => e.RequestId === r.RequestId);
+                const cost = env ? (costByEnv[env.EnvironmentId] || 0) : 0;
+                const grantBudget = grantBudgets[r.GrantId] || 0;
+                const grantCost = grantCosts[r.GrantId] || 0;
+                const budgetPct = grantBudget > 0 ? (grantCost / grantBudget * 100) : 0;
+                const budgetStatus = getBudgetStatus(budgetPct);
+
+                const today = new Date();
+                const endDate = new Date(r.ExpectedEndDate);
+                const daysUntil = Math.ceil((endDate - today) / 86400000);
+
+                let status = r.RequestStatus, statusClass = 'status-active';
+                if (r.RequestStatus === 'Completed') { statusClass = 'status-completed'; }
+                else if (daysUntil <= 0) { status = 'Expired'; statusClass = 'status-expired'; }
+                else if (daysUntil <= 30) { status = 'Expiring'; statusClass = 'status-expiring'; }
+
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><span class="servicenow-ticket">${r.RequestId}</span></td>
+                    <td>${r.CatalogItemName}</td>
+                    <td><span class="grant-name">${GRANTS[r.GrantId]?.name || r.GrantId}</span></td>
+                    <td><span class="irb-number">${r.IRBNumber || 'N/A'}</span></td>
+                    <td><span class="irb-status-badge ${getIRBStatusClass(r.IRBStatus)}">${r.IRBStatus || 'N/A'}</span></td>
+                    <td>${r.PIName}</td>
+                    <td>${DEPARTMENTS[r.DepartmentId]?.name || r.DepartmentId}</td>
+                    <td><span class="env-type-badge ${r.EnvironmentType === 'AVE' ? 'env-ave' : 'env-standard'}">${r.EnvironmentType}</span></td>
+                    <td class="text-right">${formatCurrency(cost / 12)}</td>
+                    <td><span class="budget-status-badge ${budgetStatus.class}">${budgetStatus.label}</span></td>
+                    <td>${formatDate(r.ExpectedEndDate)}</td>
+                    <td><span class="status-badge ${statusClass}">${status}</span></td>
+                `;
+                tbody.appendChild(row);
+            });
         }
 
         function calculatePIBudgetData(requests, costs, budgets) {
@@ -1776,10 +1965,13 @@
 
                 const row = document.createElement('tr');
                 row.innerHTML = `
+                    <td><span class="servicenow-ticket">${r.RequestId}</span></td>
                     <td>${r.CatalogItemName}</td>
+                    <td><span class="grant-name">${GRANTS[r.GrantId]?.name || r.GrantId}</span></td>
+                    <td><span class="irb-number">${r.IRBNumber || 'N/A'}</span></td>
+                    <td><span class="irb-status-badge ${getIRBStatusClass(r.IRBStatus)}">${r.IRBStatus || 'N/A'}</span></td>
                     <td><span class="env-type-badge ${r.EnvironmentType === 'AVE' ? 'env-ave' : 'env-standard'}">${r.EnvironmentType}</span></td>
                     <td class="text-right">${formatCurrency(cost / 12)}</td>
-                    <td>${GRANTS[r.GrantId]?.name || r.GrantId}</td>
                     <td>
                         <div style="min-width:80px;">
                             <div style="font-size:11px;color:#666;">${budgetPct.toFixed(0)}%</div>
@@ -1876,6 +2068,10 @@
 
                 const row = document.createElement('tr');
                 row.innerHTML = `
+                    <td><span class="servicenow-ticket">${request?.RequestId || 'N/A'}</span></td>
+                    <td><span class="grant-name">${request ? (GRANTS[request.GrantId]?.name || request.GrantId) : 'N/A'}</span></td>
+                    <td><span class="irb-number">${request?.IRBNumber || 'N/A'}</span></td>
+                    <td><span class="irb-status-badge ${getIRBStatusClass(request?.IRBStatus)}">${request?.IRBStatus || 'N/A'}</span></td>
                     <td><span class="severity-badge severity-${c.Severity.toLowerCase()}">${c.Severity}</span></td>
                     <td><span class="issue-type-badge issue-${c.IssueType.toLowerCase()}">${c.IssueType}</span></td>
                     <td>${c.EnvironmentId}</td>
